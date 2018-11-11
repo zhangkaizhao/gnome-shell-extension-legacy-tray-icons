@@ -52,7 +52,7 @@ function enable() {
         createTray();
 }
 
-function createSource (title, pid, ndata, sender, trayIcon) { 
+function createSource (title, pid, ndata, sender, trayIcon) {
   if (trayIcon) {
     onTrayIconAdded(this, trayIcon, title);
     return null;
@@ -134,7 +134,13 @@ function createTray() {
     sysTray = new Shell.TrayManager();
     sysTray.connect('tray-icon-added', onTrayIconAdded);
     sysTray.connect('tray-icon-removed', onTrayIconRemoved);
-    sysTray.manage_screen(global.screen, Main.panel.actor);
+    if (global.screen) {
+        // For GNOME 3.28 and older
+        sysTray.manage_screen(global.screen, Main.panel.actor);
+    } else {
+        // For GNOME 3.30+
+        sysTray.manage_screen(Main.panel.actor);
+    }
 }
 
 function destroyTray() {
@@ -150,7 +156,7 @@ function moveToTop() {
     notificationDaemon._trayManager.disconnect(notificationDaemon._trayIconRemovedId);
     trayAddedId = notificationDaemon._trayManager.connect('tray-icon-added', onTrayIconAdded);
     trayRemovedId = notificationDaemon._trayManager.connect('tray-icon-removed', onTrayIconRemoved);
-    
+
     notificationDaemon._getSource = createSource;
 
     let toDestroy = [];
@@ -190,7 +196,7 @@ function moveToTray() {
         notificationDaemon._trayManager.disconnect(trayRemovedId);
         trayRemovedId = 0;
     }
-    
+
     notificationDaemon._trayIconAddedId = notificationDaemon._trayManager.connect('tray-icon-added',
                                                 Lang.bind(notificationDaemon, notificationDaemon._onTrayIconAdded));
     notificationDaemon._trayIconRemovedId = notificationDaemon._trayManager.connect('tray-icon-removed',
@@ -213,7 +219,7 @@ function moveToTray() {
         parent.destroy();
         notificationDaemon._onTrayIconAdded(notificationDaemon, icon);
     }
-    
+
     icons = [];
 }
 
